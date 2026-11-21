@@ -8,3 +8,5 @@ data/index.json
 Thumbs.db
 Desktop.ini
 *.log
+
+deck/preview/
