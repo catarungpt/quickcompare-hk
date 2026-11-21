@@ -1,4 +1,5 @@
 # Build the 10-slide QuickCompare HK deck with PowerPoint COM.
+# Narrative: origin story -> what is built -> how it is built.
 #
 # Usage:  powershell -NoProfile -ExecutionPolicy Bypass -File scripts\make-deck.ps1
 # Output: deck\QuickCompare-HK.pptx and deck\QuickCompare-HK.pdf
@@ -6,6 +7,7 @@
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $outDir = Join-Path $root "deck"
+$shots = Join-Path $outDir "shots"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 $pptx = Join-Path $outDir "QuickCompare-HK.pptx"
 $pdf = Join-Path $outDir "QuickCompare-HK.pdf"
@@ -76,9 +78,8 @@ function Add-Chrome($slide, $number, $section) {
 }
 
 function Add-Title($slide, $title, $kicker) {
-  if ($kicker) { Add-Text $slide $kicker 64 44 832 20 11 $true $ACCENT 1 | Out-Null }
-  $top = if ($kicker) { 70 } else { 56 }
-  Add-Text $slide $title 64 $top 832 52 32 $true $TEXT 1 | Out-Null
+  Add-Text $slide $kicker 64 44 832 20 11 $true $ACCENT 1 | Out-Null
+  Add-Text $slide $title 64 70 832 52 32 $true $TEXT 1 | Out-Null
   Add-Accent $slide 64 126 64
 }
 
@@ -100,257 +101,194 @@ function Add-Bullets($slide, $lines, $l, $t, $w, $h, $size) {
   return $shape
 }
 
+function Add-Shot($slide, $file, $l, $t, $w, $caption) {
+  if (-not (Test-Path $file)) { return $null }
+  $h = [math]::Round($w * 810 / 1440, 0)
+  $pic = $slide.Shapes.AddPicture($file, 0, -1, $l, $t, $w, $h)
+  $pic.Line.Visible = -1
+  $pic.Line.ForeColor.RGB = RGB 64 74 88
+  $pic.Line.Weight = 1
+  if ($caption) {
+    Add-Text $slide $caption $l ($t + $h + 8) $w 18 9 $false $MUTED 1 | Out-Null
+  }
+  return $pic
+}
+
 # ---------------------------------------------------------------- slide 1
 $s = New-Slide
-Add-Box $s 0 0 960 540 $BG $false | Out-Null
-Add-Box $s 640 0 320 540 $CARD $false | Out-Null
+Add-Text $s "SUPERMARKET PRICES, COMPARED" 64 86 400 20 12 $true $ACCENT 1 | Out-Null
+Add-Text $s "QuickCompare" 64 118 420 56 44 $true $WHITE 1 | Out-Null
+Add-Text $s "HK" 64 176 120 40 28 $true $ACCENT 1 | Out-Null
+Add-Text $s "One place to see what a product costs at Wellcome, PNS and Market Place - and which shop is cheapest today." 64 232 400 110 16 $false $MUTED 1 | Out-Null
+Add-Accent $s 64 352 86
 
-Add-Text $s "SUPERMARKET PRICES, COMPARED" 64 92 520 20 12 $true $ACCENT 1 | Out-Null
-Add-Text $s "QuickCompare HK" 64 128 540 84 46 $true $WHITE 1 | Out-Null
-Add-Text $s "How an OpenRouter-routed AI agent built a live price index for 48,000+ Hong Kong supermarket products." 64 222 520 110 17 $false $MUTED 1 | Out-Null
-Add-Accent $s 64 356 86
-Add-Text $s "Wellcome   |   PNS   |   Market Place" 64 382 520 24 13 $false $TEXT 1 | Out-Null
-Add-Text $s "Live at catarungpt.github.io/quickcompare-hk" 64 410 520 24 12 $false $ACCENT 1 | Out-Null
+Add-Text $s "48,062" 64 386 140 34 24 $true $ACCENT 1 | Out-Null
+Add-Text $s "products" 64 418 140 18 10 $false $MUTED 1 | Out-Null
+Add-Text $s "3" 216 386 100 34 24 $true $WHITE 1 | Out-Null
+Add-Text $s "stores" 216 418 100 18 10 $false $MUTED 1 | Out-Null
+Add-Text $s "8,685" 300 386 140 34 24 $true $AMBER 1 | Out-Null
+Add-Text $s "comparisons" 300 418 140 18 10 $false $MUTED 1 | Out-Null
 
-Add-Text $s "48,062" 700 190 220 46 36 $true $ACCENT 2 | Out-Null
-Add-Text $s "products indexed" 700 238 220 20 11 $false $MUTED 2 | Out-Null
-Add-Text $s "3" 700 282 220 40 32 $true $WHITE 2 | Out-Null
-Add-Text $s "stores" 700 324 220 20 11 $false $MUTED 2 | Out-Null
-Add-Text $s "8,685" 700 368 220 40 28 $true $AMBER 2 | Out-Null
-Add-Text $s "comparisons" 700 408 220 20 11 $false $MUTED 2 | Out-Null
+Add-Text $s "Live at catarungpt.github.io/quickcompare-hk" 64 462 500 20 10 $false $MUTED 1 | Out-Null
+Add-Shot $s (Join-Path $shots "home.png") 500 110 400 "The live site, 21 November 2026" | Out-Null
 
 # ---------------------------------------------------------------- slide 2
 $s = New-Slide
-Add-Title $s "The problem: three tabs and a notebook" "WHY THIS EXISTS"
+Add-Title $s "It started with a trolley" "ORIGIN STORY"
 
-$cols = @(
-  @{ x = 64;  n = "3+";  h = "Chains, no shared view"; b = "Wellcome, PNS and Market Place each publish their own catalogue in their own format." },
-  @{ x = 356; n = "Daily"; h = "Prices move"; b = "Promotions, case deals and stock change constantly, so yesterday's note is already wrong." },
-  @{ x = 648; n = "Manual"; h = "Comparison is guesswork"; b = "Names differ between stores, so matching the same product by hand is slow and error-prone." }
-)
-foreach ($c in $cols) {
-  Add-Box $s $c.x 170 248 230 $CARD $true | Out-Null
-  Add-Text $s $c.n $($c.x + 20) 190 200 44 30 $true $ACCENT 1 | Out-Null
-  Add-Text $s $c.h $($c.x + 20) 244 208 24 14 $true $TEXT 1 | Out-Null
-  Add-Text $s $c.b $($c.x + 20) 276 208 100 11 $false $MUTED 1 | Out-Null
-}
-Add-Text $s "The goal: one search, every price, a direct link to the store's own product page." 64 424 832 30 15 $true $TEXT 1 | Out-Null
-Add-Chrome $s 2 "Problem"
+Add-Text $s "Standing in a supermarket, holding a carton of milk, wondering whether the shop next door was cheaper." 64 176 560 80 20 $false $TEXT 1 | Out-Null
+Add-Text $s "Checking meant three websites, three different product names and a note on my phone. Ten minutes of clicking to answer one simple question." 64 268 560 80 16 $false $MUTED 1 | Out-Null
+
+Add-Box $s 660 168 236 220 $CARD $true | Out-Null
+Add-Text $s "The question" 680 186 196 20 10 $true $ACCENT 1 | Out-Null
+Add-Text $s "Is this actually cheaper somewhere else?" 680 212 196 90 18 $true $TEXT 1 | Out-Null
+Add-Text $s "That was the whole brief." 680 330 196 40 10 $false $MUTED 1 | Out-Null
+Add-Chrome $s 2 "Origin"
 
 # ---------------------------------------------------------------- slide 3
 $s = New-Slide
-Add-Title $s "What we shipped" "THE PRODUCT"
+Add-Title $s "Why it is hard to answer" "THE PROBLEM"
 
-$stats = @(
-  @{ x = 64;  n = "48,062"; l = "products" },
-  @{ x = 278; n = "3";      l = "stores" },
-  @{ x = 492; n = "10,514"; l = "price drops" },
-  @{ x = 706; n = "8,685";  l = "comparisons" }
+$cols = @(
+  @{ x = 64;  n = "3";      h = "Separate shops"; b = "Wellcome, PNS and Market Place each run their own website and their own catalogue." },
+  @{ x = 356; n = "3";      h = "Different names"; b = "The same product is described differently in each shop, so names do not line up." },
+  @{ x = 648; n = "Daily";  h = "Moving prices"; b = "Promotions, case deals and stock change all the time, so yesterday's note is already wrong." }
 )
-foreach ($st in $stats) {
-  Add-Box $s $st.x 168 190 96 $CARD $true | Out-Null
-  Add-Text $s $st.n $($st.x + 14) 186 162 38 22 $true $ACCENT 1 | Out-Null
-  Add-Text $s $st.l $($st.x + 14) 228 162 20 10 $false $MUTED 1 | Out-Null
+foreach ($c in $cols) {
+  Add-Box $s $c.x 168 248 220 $CARD $true | Out-Null
+  Add-Text $s $c.n $($c.x + 20) 186 200 44 28 $true $ACCENT 1 | Out-Null
+  Add-Text $s $c.h $($c.x + 20) 238 208 24 14 $true $TEXT 1 | Out-Null
+  Add-Text $s $c.b $($c.x + 20) 270 208 100 11 $false $MUTED 1 | Out-Null
 }
-
-Add-Bullets $s @(
-  "Search by product, brand, barcode, pack size or category",
-  "Compare the same product across stores, cheapest first",
-  "See the exact price difference for every store",
-  "Save local price alerts, no account required",
-  "Every row links straight to the store's product page"
-) 64 304 832 170 15 | Out-Null
-Add-Chrome $s 3 "Product"
+Add-Text $s "Three tabs and a notebook is not a system." 64 420 832 30 16 $true $TEXT 1 | Out-Null
+Add-Chrome $s 3 "Problem"
 
 # ---------------------------------------------------------------- slide 4
 $s = New-Slide
-Add-Title $s "The AI stack: one gateway, many tools" "OPENROUTER"
+Add-Title $s "So this is what I built" "WHAT IT IS"
 
-Add-Box $s 64 176 176 88 $CARD $true | Out-Null
-Add-Text $s "Goal" 80 190 144 20 11 $true $MUTED 1 | Out-Null
-Add-Text $s "Compare HK grocery prices" 80 212 144 44 11 $false $TEXT 1 | Out-Null
+Add-Text $s "One search across all three supermarkets. Every price in one place, and a direct link to the shop that sells it." 64 146 520 50 14 $false $MUTED 1 | Out-Null
+Add-Shot $s (Join-Path $shots "home.png") 64 204 480 "The home page" | Out-Null
 
-Add-Text $s "->" 250 206 30 30 20 $true $ACCENT 2 | Out-Null
+Add-Box $s 620 160 276 96 $CARD $true | Out-Null
+Add-Text $s "48,062" 636 172 240 30 20 $true $ACCENT 1 | Out-Null
+Add-Text $s "products from three stores" 636 204 240 18 10 $false $MUTED 1 | Out-Null
 
-Add-Box $s 292 176 176 88 $CARD2 $true | Out-Null
-Add-Text $s "OpenRouter" 308 190 144 20 11 $true $ACCENT 1 | Out-Null
-Add-Text $s "Routes each request to the model" 308 212 144 44 11 $false $TEXT 1 | Out-Null
+Add-Box $s 620 268 276 96 $CARD $true | Out-Null
+Add-Text $s "8,685" 636 280 240 30 20 $true $AMBER 1 | Out-Null
+Add-Text $s "products compared across shops" 636 312 240 18 10 $false $MUTED 1 | Out-Null
 
-Add-Text $s "->" 478 206 30 30 20 $true $ACCENT 2 | Out-Null
+Add-Box $s 620 376 276 96 $CARD $true | Out-Null
+Add-Text $s "10,514" 636 388 240 30 20 $true $WHITE 1 | Out-Null
+Add-Text $s "products on offer right now" 636 420 240 18 10 $false $MUTED 1 | Out-Null
 
-Add-Box $s 520 176 176 88 $CARD $true | Out-Null
-Add-Text $s "Agent model" 536 190 144 20 11 $true $MUTED 1 | Out-Null
-Add-Text $s "Plans, writes code, reads results" 536 212 144 44 11 $false $TEXT 1 | Out-Null
-
-Add-Text $s "->" 706 206 30 30 20 $true $ACCENT 2 | Out-Null
-
-Add-Box $s 748 176 148 88 $CARD2 $true | Out-Null
-Add-Text $s "Tools" 764 190 116 20 11 $true $ACCENT 1 | Out-Null
-Add-Text $s "Browser  |  Shell  |  Files" 764 212 116 44 11 $false $TEXT 1 | Out-Null
-
-Add-Box $s 64 312 832 116 $CARD $true | Out-Null
-Add-Text $s "The loop that did the work" 80 328 500 22 13 $true $TEXT 1 | Out-Null
-Add-Text $s "Observe  ->  hypothesise  ->  call a tool  ->  read the real result  ->  fix  ->  repeat" 80 356 800 24 13 $false $ACCENT 1 | Out-Null
-Add-Text $s "No step was taken on faith: every endpoint, price and match was verified against the live site before it was accepted." 80 386 800 32 11 $false $MUTED 1 | Out-Null
-Add-Chrome $s 4 "AI stack"
+Add-Chrome $s 4 "What it is"
 
 # ---------------------------------------------------------------- slide 5
 $s = New-Slide
-Add-Title $s "Discovery: the AI found APIs nobody documented" "RESEARCH"
+Add-Title $s "Find anything in seconds" "WHAT YOU CAN DO"
+
+Add-Shot $s (Join-Path $shots "browse.png") 64 150 560 "Browse products" | Out-Null
 
 Add-Bullets $s @(
-  "Read robots.txt before touching any store",
-  "Opened each site in a real browser and inspected network traffic",
-  "Found the hidden JSON APIs behind the storefronts",
-  "Learned the PNS brand field only appears with fields=FULL",
-  "Switched Market Place to EN: otherwise names come back in Chinese"
-) 64 164 470 300 14 | Out-Null
-
-Add-Box $s 556 164 340 92 $CARD $true | Out-Null
-Add-Text $s "PNS  |  SAP Commerce" 572 176 308 18 10 $true $ACCENT 1 | Out-Null
-Add-Text $s "/api/v2/pnshk/products/search" 572 200 308 18 10 $false $TEXT 1 | Out-Null
-Add-Text $s "?query=&pageSize=100&fields=FULL" 572 220 308 18 10 $false $MUTED 1 | Out-Null
-
-Add-Box $s 556 272 340 92 $CARD $true | Out-Null
-Add-Text $s "Wellcome / Market Place  |  RTA" 572 284 308 18 10 $true $ACCENT 1 | Out-Null
-Add-Text $s "POST /api/item/wareSearch" 572 308 308 18 10 $false $TEXT 1 | Out-Null
-Add-Text $s "storeId 43 / 188   |   locale en_US" 572 328 308 18 10 $false $MUTED 1 | Out-Null
-
-Add-Box $s 556 380 340 84 $CARD $true | Out-Null
-Add-Text $s "Blocked, and left alone" 572 392 308 18 10 $true $AMBER 1 | Out-Null
-Add-Text $s "ParknShop returned 403. U Select failed TLS. No bypass attempted." 572 414 308 40 10 $false $MUTED 1 | Out-Null
-Add-Chrome $s 5 "Discovery"
+  "Search by name, brand, barcode or pack size",
+  "Filter by store or category",
+  "See the price, the stock and any promotion",
+  "Open the exact product page on the store's own site"
+) 664 170 232 260 12 | Out-Null
+Add-Chrome $s 5 "Search"
 
 # ---------------------------------------------------------------- slide 6
 $s = New-Slide
-Add-Title $s "Crawling at scale, politely" "DATA COLLECTION"
+Add-Title $s "The same product, side by side" "THE ANSWER"
 
-Add-Box $s 64 164 396 132 $CARD $true | Out-Null
-Add-Text $s "PNS" 80 178 200 18 11 $true $ACCENT 1 | Out-Null
-Add-Text $s "260 pages x 100" 80 202 360 26 20 $true $TEXT 1 | Out-Null
-Add-Text $s "25,976 products  |  full catalogue" 80 236 360 18 10 $false $MUTED 1 | Out-Null
+Add-Shot $s (Join-Path $shots "compare.png") 64 150 560 "Compare stores" | Out-Null
 
-Add-Box $s 484 164 412 132 $CARD $true | Out-Null
-Add-Text $s "Wellcome + Market Place" 500 178 380 18 11 $true $ACCENT 1 | Out-Null
-Add-Text $s "21 categories each" 500 202 380 26 20 $true $TEXT 1 | Out-Null
-Add-Text $s "11,682 + 10,404 products" 500 236 380 18 10 $false $MUTED 1 | Out-Null
+Add-Text $s "The cheapest price is green. Every other store shows exactly how much more it charges." 664 172 232 80 13 $false $TEXT 1 | Out-Null
 
-Add-Box $s 64 316 832 132 $CARD $true | Out-Null
-Add-Text $s "Why a browser, not a plain HTTP client" 80 332 500 22 13 $true $TEXT 1 | Out-Null
-Add-Text $s "Bot protection, cookies and locale all matter. Running the fetch inside the real storefront returned English names, correct currency and live stock. Batches were posted to a local ingest endpoint and merged into JSON." 80 362 800 70 12 $false $MUTED 1 | Out-Null
-Add-Chrome $s 6 "Crawling"
+Add-Box $s 664 270 232 64 $CARD $true | Out-Null
+Add-Text $s "PNS" 678 280 120 18 10 $true $TEXT 1 | Out-Null
+Add-Text $s "HK${HK}257.90" 678 300 120 20 12 $true $ACCENT 1 | Out-Null
+
+Add-Box $s 664 344 232 64 $CARD $true | Out-Null
+Add-Text $s "Wellcome" 678 354 120 18 10 $true $TEXT 1 | Out-Null
+Add-Text $s "+HK${HK}172.00" 678 374 120 20 12 $true $MUTED 1 | Out-Null
+
+Add-Text $s "One tap opens the product page on that store's website." 664 424 232 50 10 $false $MUTED 1 | Out-Null
+Add-Chrome $s 6 "Compare"
 
 # ---------------------------------------------------------------- slide 7
 $s = New-Slide
-Add-Title $s "Turning messy catalogues into matches" "DATA ENGINEERING"
+Add-Title $s "Spot the real discounts" "SAVINGS"
 
-$signals = @(
-  @{ x = 64;  y = 168; t = "Barcode";  s = "PNS EAN, exact" },
-  @{ x = 278; y = 168; t = "Brand";    s = "3,132-name dictionary" },
-  @{ x = 492; y = 168; t = "Pack size";s = "extracted + normalised" },
-  @{ x = 706; y = 168; t = "Category"; s = "path" }
-)
-foreach ($g in $signals) {
-  Add-Box $s $g.x $g.y 190 78 $CARD $true | Out-Null
-  Add-Text $s $g.t $($g.x + 14) $($g.y + 12) 162 20 11 $true $ACCENT 1 | Out-Null
-  Add-Text $s $g.s $($g.x + 14) $($g.y + 36) 162 28 9 $false $MUTED 1 | Out-Null
-}
-$signals2 = @(
-  @{ x = 64;  t = "Name tokens"; s = "Jaccard, brand/size removed" },
-  @{ x = 492; t = "Image hash";  s = "8x8 average hash, Hamming" }
-)
-for ($i = 0; $i -lt $signals2.Count; $i++) {
-  $g = $signals2[$i]
-  Add-Box $s $g.x 262 404 78 $CARD2 $true | Out-Null
-  Add-Text $s $g.t $($g.x + 14) 274 376 20 11 $true $ACCENT 1 | Out-Null
-  Add-Text $s $g.s $($g.x + 14) 298 376 28 9 $false $MUTED 1 | Out-Null
-}
+Add-Shot $s (Join-Path $shots "deals.png") 64 150 560 "Current price drops" | Out-Null
 
-Add-Box $s 64 366 832 100 $CARD $true | Out-Null
-Add-Text $s "->" 430 392 100 40 24 $true $ACCENT 2 | Out-Null
-Add-Text $s "One matchGroup per product" 64 386 360 26 16 $true $TEXT 2 | Out-Null
-Add-Text $s "5,915 groups  |  21,042 image hashes" 64 416 360 20 10 $false $MUTED 2 | Out-Null
-Add-Text $s "Precision over recall: a shared brand and size is not enough. Fresh Milk, Skimmed Milk and Soy Milk must stay apart." 560 384 320 68 10 $false $MUTED 1 | Out-Null
-Add-Chrome $s 7 "Matching"
+Add-Text $s "Every offer keeps its original price, so a discount is a real discount - not just a sticker." 664 172 232 80 13 $false $TEXT 1 | Out-Null
+
+Add-Text $s "10,514" 664 270 232 34 24 $true $ACCENT 1 | Out-Null
+Add-Text $s "products currently on offer" 664 304 232 20 10 $false $MUTED 1 | Out-Null
+Add-Text $s "89%" 664 344 232 34 24 $true $AMBER 1 | Out-Null
+Add-Text $s "biggest discount today" 664 378 232 20 10 $false $MUTED 1 | Out-Null
+Add-Text $s "Sorted by the biggest saving, so the best deals are at the top." 664 420 232 50 10 $false $MUTED 1 | Out-Null
+Add-Chrome $s 7 "Deals"
 
 # ---------------------------------------------------------------- slide 8
 $s = New-Slide
-Add-Title $s "The experience" "INTERFACE"
+Add-Title $s "How it is built" "BEHIND THE SCENES"
 
-Add-Box $s 64 164 500 300 $CARD $true | Out-Null
-Add-Text $s "Compare stores" 80 180 460 18 10 $true $ACCENT 1 | Out-Null
-Add-Text $s "Kowloon Dairy Fresh Milk 946ML" 80 204 460 22 12 $true $TEXT 1 | Out-Null
-
-$rows = @(
-  @{ y = 240; store = "PNS";          price = "HK${HK}28.00"; note = "best price"; color = $ACCENT },
-  @{ y = 282; store = "Market Place"; price = "HK${HK}32.00"; note = "+HK${HK}4.00";    color = $MUTED },
-  @{ y = 324; store = "Wellcome";     price = "HK${HK}32.00"; note = "+HK${HK}4.00";    color = $MUTED }
+$steps = @(
+  @{ x = 64;  n = "01"; h = "Collect"; b = "Read each store's public catalogue, the same pages a shopper sees." },
+  @{ x = 278; n = "02"; h = "Clean";   b = "Learn each product's brand and pack size, so names can be compared." },
+  @{ x = 492; n = "03"; h = "Match";   b = "Pair the same product across shops using brand, size, name and photo." },
+  @{ x = 706; n = "04"; h = "Show";    b = "Rebuild the index and the page, then links go straight to the store." }
 )
-foreach ($r in $rows) {
-  Add-Box $s 80 $r.y 336 36 $CARD2 $true | Out-Null
-  Add-Text $s $r.store 92 ($r.y + 8) 150 18 10 $true $TEXT 1 | Out-Null
-  Add-Text $s $r.price 240 ($r.y + 7) 100 20 11 $true $(if ($r.note -eq "best price") { $ACCENT } else { $TEXT }) 1 | Out-Null
-  Add-Text $s $r.note 344 ($r.y + 9) 70 16 8 $true $r.color 1 | Out-Null
+foreach ($st in $steps) {
+  Add-Box $s $st.x 164 190 150 $CARD $true | Out-Null
+  Add-Text $s $st.n $($st.x + 14) 178 162 20 10 $true $ACCENT 1 | Out-Null
+  Add-Text $s $st.h $($st.x + 14) 202 162 26 15 $true $TEXT 1 | Out-Null
+  Add-Text $s $st.b $($st.x + 14) 238 162 60 10 $false $MUTED 1 | Out-Null
 }
-Add-Text $s "Save HK${HK}4.00 vs the highest price" 80 380 460 20 11 $true $ACCENT 1 | Out-Null
-Add-Text $s "Cheapest price is green, in a green row, with a Best badge." 80 408 460 30 10 $false $MUTED 1 | Out-Null
-
-Add-Bullets $s @(
-  "Search across 48k products instantly",
-  "Today's price drops, sorted by discount",
-  "Price alerts stored in the browser",
-  "Light and dark themes, mobile layout",
-  "Live on GitHub Pages"
-) 600 176 296 280 13 | Out-Null
-Add-Chrome $s 8 "Interface"
+Add-Box $s 64 340 832 96 $CARD2 $true | Out-Null
+Add-Text $s "48,062 products - 5,915 matched groups - 21,042 photos compared" 84 358 792 24 13 $true $TEXT 1 | Out-Null
+Add-Text $s "A full refresh takes about twenty minutes and runs on a normal laptop. No accounts, no tracking, no middleman." 84 388 792 34 11 $false $MUTED 1 | Out-Null
+Add-Chrome $s 8 "How"
 
 # ---------------------------------------------------------------- slide 9
 $s = New-Slide
-Add-Title $s "Results" "OUTCOME"
+Add-Title $s "The AI was the builder, not the product" "THE AI PARTNER"
 
-$big = @(
-  @{ x = 64;  n = "8,685"; l = "cross-store comparisons" },
-  @{ x = 356; n = "5,915"; l = "matched product groups" },
-  @{ x = 648; n = "20 min"; l = "full refresh" }
-)
-foreach ($b in $big) {
-  Add-Box $s $b.x 164 248 112 $CARD $true | Out-Null
-  Add-Text $s $b.n $($b.x + 16) 182 216 44 26 $true $ACCENT 1 | Out-Null
-  Add-Text $s $b.l $($b.x + 16) 228 216 20 10 $false $MUTED 1 | Out-Null
-}
-
-Add-Box $s 64 300 832 150 $CARD2 $true | Out-Null
-Add-Text $s "What the user gets" 80 314 500 20 11 $true $ACCENT 1 | Out-Null
 Add-Bullets $s @(
-  "Every price on one screen, with the cheapest highlighted",
-  "An exact HK${HK} difference for every store",
-  "A direct link to the product page on that store's own site",
-  "A refreshed index, not a stale snapshot"
-) 80 340 760 100 12 | Out-Null
+  "I described the goal; the AI chose the tools and the order of work.",
+  "It opened the real store websites and read their public data, rather than guessing.",
+  "It wrote the collector, the matching and the page - then tested each step against the live site.",
+  "OpenRouter routed each request to the right model, so the project was never tied to one provider.",
+  "Every price in the index was seen by a browser before it was accepted."
+) 64 164 560 300 13 | Out-Null
 
-Add-Text $s "The old way: five minutes and three tabs. Now: one search." 64 468 832 24 13 $true $TEXT 1 | Out-Null
-Add-Chrome $s 9 "Results"
+Add-Box $s 664 168 232 220 $CARD $true | Out-Null
+Add-Text $s "The rule" 682 186 196 20 10 $true $ACCENT 1 | Out-Null
+Add-Text $s "Never claim a price the browser has not seen." 682 212 196 100 16 $true $TEXT 1 | Out-Null
+Add-Text $s "That one rule kept the work honest." 682 320 196 50 10 $false $MUTED 1 | Out-Null
+Add-Chrome $s 9 "AI"
 
 # ---------------------------------------------------------------- slide 10
 $s = New-Slide
-Add-Title $s "Why the AI approach worked" "TAKEAWAYS"
+Add-Title $s "What comes next" "NEXT"
 
-$lessons = @(
-  @{ x = 64;  y = 168; n = "01"; h = "Tools over guessing"; b = "Every endpoint and price was checked against the live site. The browser was the source of truth." },
-  @{ x = 484; y = 168; n = "02"; h = "Failures became fixes"; b = "403s, TLS errors and encoding bugs shaped the pipeline instead of stopping it." },
-  @{ x = 64;  y = 306; n = "03"; h = "Precision beats volume"; b = "5,915 trustworthy matches are worth more than 20,000 false ones." },
-  @{ x = 484; y = 306; n = "04"; h = "One loop, end to end"; b = "Research, code, crawl, match, UI and deploy all ran in a single agent session." }
-)
-foreach ($l in $lessons) {
-  Add-Box $s $l.x $l.y 412 122 $CARD $true | Out-Null
-  Add-Text $s $l.n $($l.x + 16) ($l.y + 14) 40 18 10 $true $ACCENT 1 | Out-Null
-  Add-Text $s $l.h $($l.x + 16) ($l.y + 36) 380 22 13 $true $TEXT 1 | Out-Null
-  Add-Text $s $l.b $($l.x + 16) ($l.y + 62) 380 50 10 $false $MUTED 1 | Out-Null
-}
+Add-Bullets $s @(
+  "Refresh automatically every six hours",
+  "Add more Hong Kong stores",
+  "Improve matching for the last few product gaps",
+  "Keep the code and the data free on GitHub"
+) 64 168 520 260 14 | Out-Null
 
-Add-Text $s "Next: a 6-hour scheduled refresh, more stores, and fuzzy matching for the remaining gaps." 64 446 832 24 11 $false $MUTED 1 | Out-Null
-Add-Text $s "catarungpt.github.io/quickcompare-hk" 64 474 500 22 11 $true $ACCENT 1 | Out-Null
-Add-Chrome $s 10 "Takeaways"
+Add-Box $s 620 168 276 200 $CARD $true | Out-Null
+Add-Text $s "Try it" 636 186 244 20 10 $true $ACCENT 1 | Out-Null
+Add-Text $s "catarungpt.github.io/quickcompare-hk" 636 214 244 60 13 $true $TEXT 1 | Out-Null
+Add-Text $s "github.com/catarungpt/quickcompare-hk" 636 286 244 60 11 $false $MUTED 1 | Out-Null
+
+Add-Text $s "Built in Hong Kong, for the weekly shop." 64 430 520 24 12 $false $MUTED 1 | Out-Null
+Add-Chrome $s 10 "Next"
 
 # ---------------------------------------------------------------- save
 if (Test-Path $pptx) { Remove-Item $pptx -Force }
