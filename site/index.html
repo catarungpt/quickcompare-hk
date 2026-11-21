@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>QuickCompare HK — Compare supermarket prices across Hong Kong</title>
+  <meta name="description" content="Compare prices for 48,000+ supermarket products across Wellcome, PNS and Market Place. Search by product, brand or barcode and jump straight to the store." />
+  <meta name="theme-color" content="#ffffff" />
+  <meta property="og:title" content="QuickCompare HK — Supermarket prices, compared" />
+  <meta property="og:description" content="One search across Wellcome, PNS and Market Place. See current price drops and the cheapest store for every product." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/manrope-latin-ext.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    /* Apply the saved theme before the first paint so dark mode never flashes. */
+    (function () {
+      try {
+        var pref = localStorage.getItem("qc_theme") || "system";
+        var dark = pref === "dark" || (pref === "system" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", dark);
+        if (dark) document.querySelector('meta[name="theme-color"]').setAttribute("content", "#000000");
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.8 12 3l9 7.8"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.6 13.6 13 21.2a2 2 0 0 1-2.8 0l-7.4-7.4A2 2 0 0 1 2.2 12V4a1.8 1.8 0 0 1 1.8-1.8h8a2 2 0 0 1 1.4.6l7.2 7.2a2 2 0 0 1 0 3.6Z"/><circle cx="7.5" cy="7.5" r="1.4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16.2 16.2 4.8 4.8"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M6 21h12"/><path d="m5 7 7-2 7 2"/><path d="M5 7 2.5 13h5L5 7Z"/><path d="M19 7l-2.5 6h5L19 7Z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 9a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6"/><path d="M10 20a2.2 2.2 0 0 0 4 0"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.6"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="m6 7 1 14h10l1-14"/><path d="M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-store" viewBox="0 0 24 24"><path d="M3 9.5 4.8 4h14.4L21 9.5"/><path d="M4.5 9.5V21h15V9.5"/><path d="M3 9.5a2.5 2.5 0 0 0 5 0 2.4 2.4 0 0 0 4.9 0 2.4 2.4 0 0 0 4.9 0 2.5 2.5 0 0 0 5 0"/><path d="M9 21v-5h6v5"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+    <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 4v16"/><path d="m6 14 6 6 6-6"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 2.5c.7 4.7 2.8 6.8 7.5 7.5-4.7.7-6.8 2.8-7.5 7.5-.7-4.7-2.8-6.8-7.5-7.5 4.7-.7 6.8-2.8 7.5-7.5Z"/><path d="M19 16.5c.3 1.9 1.1 2.7 3 3-1.9.3-2.7 1.1-3 3-.3-1.9-1.1-2.7-3-3 1.9-.3 2.7-1.1 3-3Z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 10.5V17"/><circle cx="12" cy="7.4" r="0.9" fill="currentColor" stroke="none"/></symbol>
+  </svg>
+
+  <header class="app-header" id="appHeader">
+    <div class="wrap header-top">
+      <a class="brand" href="#home" data-nav="home" aria-label="QuickCompare HK home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" role="img">
+            <rect width="32" height="32" rx="10" fill="currentColor"/>
+            <path d="M9 20.5 20.5 9" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M12 9h8.5v8.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="9.5" cy="22.5" r="2.4" fill="#fff"/>
+          </svg>
+        </span>
+        <span class="brand-name">QuickCompare<span class="brand-suffix">HK</span></span>
+      </a>
+
+      <div class="header-loc" id="locWrap">
+        <span class="loc-kicker">Comparing prices in</span>
+        <button class="loc-btn" id="locBtn" type="button" aria-expanded="false" aria-controls="locMenu">
+          <svg class="icon"><use href="#i-pin"/></svg>
+          <span id="locLabel">Hong Kong</span>
+          <svg class="icon icon-sm"><use href="#i-chevron"/></svg>
+        </button>
+        <div class="loc-menu" id="locMenu" hidden>
+          <p class="loc-menu-title">Where do you shop?</p>
+          <div id="locOptions"></div>
+          <p class="loc-menu-note">Online prices are the same across Hong Kong. The district only personalises your greeting.</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch to dark mode" title="Switch theme">
+          <svg class="icon icon-theme-light"><use href="#i-sun"/></svg>
+          <svg class="icon icon-theme-dark"><use href="#i-moon"/></svg>
+        </button>
+        <button class="icon-btn avatar-btn" type="button" data-nav="profile" aria-label="Open profile">
+          <svg class="icon"><use href="#i-user"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="wrap search-shell">
+      <form class="searchbox" id="searchForm" role="search" autocomplete="off">
+        <svg class="icon search-icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input id="search" type="search" placeholder="Search products, brands or barcodes…" aria-label="Search products" autocomplete="off" spellcheck="false" />
+        <button class="search-clear" id="clear" type="button" aria-label="Clear search" hidden>
+          <svg class="icon icon-sm"><use href="#i-close"/></svg>
+        </button>
+        <kbd class="search-kbd" aria-hidden="true">Ctrl K</kbd>
+      </form>
+      <div class="suggestions" id="suggestions" hidden></div>
+      <div class="recent-searches" id="recentWrap" hidden>
+        <span class="recent-label">Recent</span>
+        <div class="recent-list" id="recentList"></div>
+      </div>
+    </div>
+
+    <nav class="top-nav wrap" aria-label="Primary">
+      <button type="button" data-nav="home" class="top-link">Home</button>
+      <button type="button" data-nav="browse" class="top-link">Browse products</button>
+      <button type="button" data-nav="deals" class="top-link">Deals</button>
+      <button type="button" data-nav="compare" class="top-link">Compare stores</button>
+      <button type="button" data-nav="alerts" class="top-link">Price alerts</button>
+      <span class="top-nav-spacer"></span>
+      <span class="top-nav-meta" id="topMeta">Loading index…</span>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- ───────────────────────────── HOME ───────────────────────────── -->
+    <section class="view" id="view-home">
+      <div class="wrap hero">
+        <div class="hero-copy">
+          <span class="eyebrow"><svg class="icon icon-sm"><use href="#i-sparkle"/></svg> Hong Kong's supermarket price index</span>
+          <h1>Every aisle.<br><span class="accent-text">One smart price.</span></h1>
+          <p class="hero-lede">Search <strong id="heroCount">thousands of</strong> products across Wellcome, PNS and Market Place. See every price, every drop, and the exact product page — in one place.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" type="button" data-nav="browse">
+              Start comparing
+              <svg class="icon icon-sm"><use href="#i-arrow"/></svg>
+            </button>
+            <button class="btn btn-ghost" type="button" data-nav="deals">
+              Current drops
+              <span class="btn-count" id="heroDealCount">0</span>
+            </button>
+          </div>
+          <dl class="hero-stats">
+            <div><dt>Products</dt><dd id="statProducts">—</dd></div>
+            <div><dt>Stores</dt><dd id="statStores">—</dd></div>
+            <div><dt>On offer</dt><dd id="statDeals">—</dd></div>
+          </dl>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <div class="hero-card">
+            <div class="hero-card-head">
+              <span class="hero-card-kicker">Best current drop</span>
+              <span class="badge badge-save" id="heroBadge">—</span>
+            </div>
+            <div class="hero-product">
+              <div class="hero-thumb" id="heroThumb"></div>
+              <div class="hero-product-info">
+                <p class="hero-product-name" id="heroName">Loading current deals…</p>
+                <p class="hero-product-store" id="heroStore"></p>
+                <div class="hero-price-line">
+                  <strong id="heroPrice">—</strong>
+                  <span class="was" id="heroWas"></span>
+                </div>
+              </div>
+            </div>
+            <div class="hero-card-foot">
+              <span class="live-dot"></span>
+              <span id="heroFoot">Prices refreshed every 6 hours</span>
+            </div>
+          </div>
+          <div class="float-card float-a">
+            <span class="float-icon"><svg class="icon"><use href="#i-arrow-down"/></svg></span>
+            <span><b id="floatSaving">—</b><small>biggest saving</small></span>
+          </div>
+          <div class="float-card float-b">
+            <span class="float-icon float-icon-stores"><svg class="icon"><use href="#i-store"/></svg></span>
+            <span><b id="floatStores">—</b><small>stores compared</small></span>
+          </div>
+        </div>
+      </div>
+
+      <section class="section wrap" aria-labelledby="storesHeading">
+        <div class="section-head">
+          <div>
+            <h2 id="storesHeading">Prices from every store</h2>
+            <p class="section-sub" id="storesSub">Live catalogue coverage and the last time each store was checked.</p>
+          </div>
+          <button class="link-btn" type="button" data-nav="browse">Browse all <svg class="icon icon-sm"><use href="#i-arrow"/></svg></button>
+        </div>
+        <div class="store-strip" id="storeStrip"></div>
+      </section>
+
+      <section class="wrap" aria-label="Promotion">
+        <div class="promo-banner">
+          <div class="promo-copy">
+            <span class="promo-kicker"><svg class="icon icon-sm"><use href="#i-tag"/></svg> Savings tracked</span>
+            <h2><span id="promoDealCount">Thousands of</span> products have a lower price in the current index</h2>
+            <p>We track the original price so you can see the real discount — not just the sticker price.</p>
+          </div>
+          <div class="promo-art" aria-hidden="true">
+            <span class="promo-percent" id="promoPercent">—</span>
+            <span class="promo-percent-label">biggest drop</span>
+          </div>
+          <button class="btn btn-on-dark" type="button" data-nav="deals">
+            See price drops <svg class="icon icon-sm"><use href="#i-arrow"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="section wrap" aria-labelledby="trendingHeading">
+        <div class="section-head">
+          <div>
+            <h2 id="trendingHeading">Trending in Hong Kong</h2>
+            <p class="section-sub">The staples people are comparing most.</p>
+          </div>
+          <button class="link-btn" type="button" data-nav="browse">See everything <svg class="icon icon-sm"><use href="#i-arrow"/></svg></button>
+        </div>
+        <div class="h-scroll" id="trendingStrip"></div>
+      </section>
+
+      <section class="section wrap" aria-labelledby="brandsHeading">
+        <div class="section-head">
+          <div>
+            <h2 id="brandsHeading">Popular brands</h2>
+            <p class="section-sub">Jump straight into a brand's shelf.</p>
+          </div>
+        </div>
+        <div class="brand-cloud" id="brandCloud"></div>
+      </section>
+
+      <section class="section wrap" aria-labelledby="dropsHeading">
+        <div class="section-head">
+          <div>
+            <h2 id="dropsHeading">Biggest price drops</h2>
+            <p class="section-sub">The biggest percentage cuts in the current catalogue.</p>
+          </div>
+          <button class="link-btn" type="button" data-nav="deals">See all deals <svg class="icon icon-sm"><use href="#i-arrow"/></svg></button>
+        </div>
+        <div class="h-scroll deal-strip" id="dropStrip"></div>
+      </section>
+
+      <section class="section wrap" aria-labelledby="howHeading">
+        <div class="section-head">
+          <div>
+            <h2 id="howHeading">How it works</h2>
+            <p class="section-sub">A price index built from the stores' own catalogues.</p>
+          </div>
+        </div>
+        <div class="steps">
+          <article class="step-card">
+            <span class="step-num">01</span>
+            <h3>Search once</h3>
+            <p>Find a product by name, brand, barcode or category across every store we track.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-num">02</span>
+            <h3>Compare the real price</h3>
+            <p>See the current price, the original price, unit pricing and any promotion side by side.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-num">03</span>
+            <h3>Buy at the store</h3>
+            <p>Every row links to the exact product page on the store's website. No middleman, no markup.</p>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <!-- ───────────────────────────── BROWSE ───────────────────────────── -->
+    <section class="view" id="view-browse" hidden>
+      <div class="wrap page">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Product search</p>
+            <h1 id="browseTitle">All products</h1>
+            <p class="page-sub" id="browseSub">Every product in the index, newest price first.</p>
+          </div>
+          <div class="page-head-actions">
+            <button class="btn btn-ghost btn-sm" type="button" id="clearFilters">
+              <svg class="icon icon-sm"><use href="#i-filter"/></svg> Reset filters
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-panel">
+          <label class="field">
+            <span>Store</span>
+            <select id="store"><option value="all">All stores</option></select>
+          </label>
+          <label class="field">
+            <span>Category</span>
+            <select id="category"><option value="all">All categories</option></select>
+          </label>
+          <label class="field">
+            <span>Sort by</span>
+            <select id="sort">
+              <option value="relevance">Best match</option>
+              <option value="price-asc">Price: low to high</option>
+              <option value="price-desc">Price: high to low</option>
+              <option value="unit-asc">Unit price: low to high</option>
+              <option value="discount">Biggest discount</option>
+              <option value="name-asc">Name: A–Z</option>
+            </select>
+          </label>
+          <label class="switch">
+            <input id="inStock" type="checkbox" />
+            <span class="switch-track" aria-hidden="true"></span>
+            <span>In stock only</span>
+          </label>
+        </div>
+
+        <div class="active-filters" id="activeFilters" hidden></div>
+
+        <div class="result-bar">
+          <p class="result-count" id="count">Loading products…</p>
+          <p class="result-note"><svg class="icon icon-sm"><use href="#i-clock"/></svg> <span id="browseRefreshed">—</span></p>
+        </div>
+
+        <div class="product-grid" id="results"></div>
+        <p class="empty" id="empty" hidden>
+          <strong>No products match that search.</strong>
+          <span>Try a shorter phrase, a brand name, or reset the filters.</span>
+          <button class="btn btn-primary btn-sm" type="button" id="emptyReset">Reset filters</button>
+        </p>
+        <div class="more-wrap"><button class="btn btn-ghost" type="button" id="more" hidden>Load more products</button></div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────── DEALS ───────────────────────────── -->
+    <section class="view" id="view-deals" hidden>
+      <div class="wrap page">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Live discounts</p>
+            <h1>Current price drops</h1>
+            <p class="page-sub" id="dealSub">The biggest current discounts across all tracked stores.</p>
+          </div>
+          <div class="page-head-actions">
+            <label class="field field-inline">
+              <span>Sort by</span>
+              <select id="dealSort">
+                <option value="discount">Biggest discount</option>
+                <option value="saving">Biggest saving</option>
+                <option value="price-asc">Price: low to high</option>
+                <option value="price-desc">Price: high to low</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="result-bar">
+          <p class="result-count" id="dealCount">Loading deals…</p>
+          <p class="result-note"><svg class="icon icon-sm"><use href="#i-clock"/></svg> <span id="dealRefreshed">—</span></p>
+        </div>
+        <div class="product-grid" id="dealGrid"></div>
+        <p class="empty" id="dealEmpty" hidden>
+          <strong>No discounted products match that search.</strong>
+          <span>Try another search or clear the search box.</span>
+        </p>
+        <div class="more-wrap"><button class="btn btn-ghost" type="button" id="moreDeals" hidden>Load more deals</button></div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────── COMPARE ───────────────────────────── -->
+    <section class="view" id="view-compare" hidden>
+      <div class="wrap page">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Side by side</p>
+            <h1>Compare stores</h1>
+            <p class="page-sub" id="compareSub">The same product, matched across stores, cheapest first.</p>
+          </div>
+        </div>
+        <div class="info-strip">
+          <span class="info-icon"><svg class="icon"><use href="#i-scale"/></svg></span>
+          <p><strong>How matching works.</strong> Products are grouped by barcode, brand and pack size, then checked by name and image. Very large price gaps and mismatched names are hidden because they usually mean different pack sizes.</p>
+        </div>
+        <div class="result-bar">
+          <p class="result-count" id="compare-count">Loading comparisons…</p>
+          <p class="result-note"><svg class="icon icon-sm"><use href="#i-clock"/></svg> <span id="compareRefreshed">—</span></p>
+        </div>
+        <div class="compare-grid" id="compare"></div>
+        <p class="empty" id="compare-empty" hidden>
+          <strong>No product is listed by more than one store yet.</strong>
+          <span>Try clearing the search or store filter. Matches need a shared barcode or an identical normalised name.</span>
+        </p>
+        <div class="more-wrap"><button class="btn btn-ghost" type="button" id="more-compare" hidden>Load more comparisons</button></div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────── ALERTS ───────────────────────────── -->
+    <section class="view" id="view-alerts" hidden>
+      <div class="wrap page">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Watch the price</p>
+            <h1>Price alerts</h1>
+            <p class="page-sub">Save a target price. We check it against the current index every time you open this page.</p>
+          </div>
+        </div>
+        <div class="alerts-layout">
+          <form class="panel" id="alertForm">
+            <h2>Create an alert</h2>
+            <p class="panel-sub">Stored in this browser only. No account needed.</p>
+            <label class="field field-block">
+              <span>Product or brand</span>
+              <input id="alertProduct" type="text" placeholder="e.g. Kowloon Dairy milk" required />
+            </label>
+            <label class="field field-block">
+              <span>Target price (HK$)</span>
+              <input id="alertPrice" type="number" min="0.1" step="0.1" placeholder="e.g. 25" required />
+            </label>
+            <button class="btn btn-primary btn-block" type="submit">
+              <svg class="icon icon-sm"><use href="#i-bell"/></svg> Save alert
+            </button>
+            <p class="form-note" id="alertNote" hidden></p>
+          </form>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Your alerts</h2>
+                <p class="panel-sub" id="alertSummary">No alerts saved yet.</p>
+              </div>
+              <button class="btn btn-ghost btn-sm" type="button" id="clearAlerts" hidden>Clear all</button>
+            </div>
+            <div class="alert-list" id="alertList"></div>
+            <p class="empty empty-inline" id="alertEmpty">
+              <strong>No price alerts yet.</strong>
+              <span>Add one on the left and it will show the current cheapest match here.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────── PROFILE ───────────────────────────── -->
+    <section class="view" id="view-profile" hidden>
+      <div class="wrap page">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Your setup</p>
+            <h1>Profile &amp; data</h1>
+            <p class="page-sub">Everything here stays in your browser. There is no account and no tracking.</p>
+          </div>
+        </div>
+        <div class="profile-grid">
+          <section class="panel profile-hero">
+            <span class="profile-avatar"><svg class="icon"><use href="#i-user"/></svg></span>
+            <div>
+              <h2>Smarter shopper</h2>
+              <p class="panel-sub">Comparing prices in <strong id="profileDistrict">Hong Kong</strong></p>
+            </div>
+            <div class="profile-stats" id="profileStats"></div>
+          </section>
+
+          <section class="panel">
+            <h2>Appearance</h2>
+            <p class="panel-sub">Match the app to your system or pick a theme.</p>
+            <div class="segmented" id="themeSegment" role="group" aria-label="Theme">
+              <button type="button" data-theme="system">System</button>
+              <button type="button" data-theme="light">Light</button>
+              <button type="button" data-theme="dark">Dark</button>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Location</h2>
+            <p class="panel-sub">Online prices are the same across Hong Kong. The district only personalises your greeting.</p>
+            <label class="field field-block">
+              <span>District</span>
+              <select id="districtSelect"></select>
+            </label>
+          </section>
+
+          <section class="panel">
+            <h2>Stores tracked</h2>
+            <p class="panel-sub">Each link opens the store's public website.</p>
+            <div class="store-links" id="profileStores"></div>
+          </section>
+
+          <section class="panel">
+            <h2>About the data</h2>
+            <p class="panel-sub">The index is rebuilt from the stores' public catalogues. Prices and availability change; always confirm on the store page.</p>
+            <div class="about-rows">
+              <div><span>Products</span><strong id="aboutProducts">—</strong></div>
+              <div><span>Categories</span><strong id="aboutCategories">—</strong></div>
+              <div><span>Last refresh</span><strong id="aboutRefresh">—</strong></div>
+              <div><span>Currency</span><strong>HKD (HK$)</strong></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Local data</h2>
+            <p class="panel-sub">Recent searches, theme, district and price alerts are saved with <code>localStorage</code>.</p>
+            <button class="btn btn-ghost btn-sm" type="button" id="clearLocal">Clear saved data</button>
+            <p class="form-note" id="localNote" hidden>Saved data cleared.</p>
+          </section>
+
+          <section class="panel">
+            <h2>Disclaimer</h2>
+            <p class="panel-sub">QuickCompare HK is an independent price comparison project. It is not affiliated with Wellcome, PNS, Market Place or their parent companies. Product names and images belong to their respective owners.</p>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="#home" data-nav="home" aria-label="QuickCompare HK home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" role="img">
+              <rect width="32" height="32" rx="10" fill="currentColor"/>
+              <path d="M9 20.5 20.5 9" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>
+              <path d="M12 9h8.5v8.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="9.5" cy="22.5" r="2.4" fill="#fff"/>
+            </svg>
+          </span>
+          <span class="brand-name">QuickCompare<span class="brand-suffix">HK</span></span>
+        </a>
+        <p>Supermarket prices across Hong Kong, compared in one search.</p>
+      </div>
+      <div class="footer-col">
+        <h3>Shop</h3>
+        <a href="#deals" data-nav="deals">Price drops</a>
+        <a href="#browse" data-nav="browse">All products</a>
+        <a href="#compare" data-nav="compare">Compare stores</a>
+      </div>
+      <div class="footer-col">
+        <h3>Tools</h3>
+        <a href="#alerts" data-nav="alerts">Price alerts</a>
+        <a href="#profile" data-nav="profile">Profile &amp; data</a>
+        <button type="button" id="footerTheme">Toggle theme</button>
+      </div>
+      <div class="footer-col">
+        <h3>Stores</h3>
+        <a href="https://www.wellcome.com.hk/" target="_blank" rel="noopener noreferrer">Wellcome ↗</a>
+        <a href="https://www.pns.hk/en/" target="_blank" rel="noopener noreferrer">PNS ↗</a>
+        <a href="https://www.marketplacehk.com/" target="_blank" rel="noopener noreferrer">Market Place ↗</a>
+      </div>
+    </div>
+    <div class="wrap footer-bottom">
+      <p>© <span id="year">2026</span> QuickCompare HK. Prices are collected from public store catalogues and may change at any time. Always confirm the price on the store's page before buying.</p>
+      <p class="footer-meta" id="footerMeta">—</p>
+    </div>
+  </footer>
+
+  <nav class="bottom-nav" aria-label="Mobile navigation">
+    <button type="button" data-nav="home" class="bottom-link">
+      <svg class="icon"><use href="#i-home"/></svg><span>Home</span>
+    </button>
+    <button type="button" data-nav="deals" class="bottom-link">
+      <svg class="icon"><use href="#i-tag"/></svg><span>Deals</span>
+    </button>
+    <button type="button" data-nav="browse" class="bottom-link bottom-link-main">
+      <span class="bottom-main-circle"><svg class="icon"><use href="#i-search"/></svg></span><span>Browse</span>
+    </button>
+    <button type="button" data-nav="compare" class="bottom-link">
+      <svg class="icon"><use href="#i-scale"/></svg><span>Compare</span>
+    </button>
+    <button type="button" data-nav="alerts" class="bottom-link">
+      <svg class="icon"><use href="#i-bell"/></svg><span>Alerts</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

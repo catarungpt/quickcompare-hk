@@ -1,0 +1,10 @@
+# Generated crawl data. Regenerate with the scripts in scripts/.
+data/raw/
+data/products/
+data/index.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log

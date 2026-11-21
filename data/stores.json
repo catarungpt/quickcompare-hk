@@ -1,0 +1,26 @@
+{
+  "updatedAt": "2026-11-07T17:10:00+08:00",
+  "stores": [
+    {
+      "id": "wellcome",
+      "name": "Wellcome",
+      "url": "https://www.wellcome.com.hk/",
+      "catalogue": "https://www.wellcome.com.hk/en/",
+      "notes": "DFI / RTA platform. Public wareSearch API."
+    },
+    {
+      "id": "pns",
+      "name": "PNS",
+      "url": "https://www.pns.hk/en/",
+      "catalogue": "https://www.pns.hk/en/",
+      "notes": "ParknShop. SAP Commerce (Hybris) API at api.pns.hk."
+    },
+    {
+      "id": "marketplace",
+      "name": "Market Place",
+      "url": "https://www.marketplacehk.com/",
+      "catalogue": "https://www.marketplacehk.com/",
+      "notes": "DFI / RTA platform, same API shape as Wellcome. storeId 188, dmTenantId 0. Switch the site to EN before crawling or names come back in Chinese."
+    }
+  ]
+}
