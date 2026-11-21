@@ -23,6 +23,7 @@ $ACCENT = RGB 47 211 181
 $AMBER  = RGB 255 176 32
 $WHITE  = RGB 255 255 255
 $HK     = [char]36
+$STATS = [System.IO.File]::ReadAllText((Join-Path $outDir "stats.json"), [System.Text.Encoding]::UTF8) | ConvertFrom-Json
 
 $app = New-Object -ComObject PowerPoint.Application
 $app.Visible = -1
@@ -170,17 +171,22 @@ Add-Title $s "So this is what I built" "WHAT IT IS"
 Add-Text $s "One search across all three supermarkets. Every price in one place, and a direct link to the shop that sells it." 64 146 520 50 14 $false $MUTED 1 | Out-Null
 Add-Shot $s (Join-Path $shots "home.png") 64 204 480 "The home page" | Out-Null
 
-Add-Box $s 620 160 276 96 $CARD $true | Out-Null
-Add-Text $s "48,062" 636 172 240 30 20 $true $ACCENT 1 | Out-Null
-Add-Text $s "products from three stores" 636 204 240 18 10 $false $MUTED 1 | Out-Null
+Add-Text $s "WHERE THEY COME FROM" 604 156 296 18 10 $true $ACCENT 1 | Out-Null
 
-Add-Box $s 620 268 276 96 $CARD $true | Out-Null
-Add-Text $s "8,685" 636 280 240 30 20 $true $AMBER 1 | Out-Null
-Add-Text $s "products compared across shops" 636 312 240 18 10 $false $MUTED 1 | Out-Null
+$maxCount = ($STATS.stores | Measure-Object -Property count -Maximum).Maximum
+$storeY = 190
+foreach ($st in $STATS.stores) {
+  $bw = [math]::Round(($st.count / $maxCount) * 240, 0)
+  Add-Text $s $st.name 604 $storeY 150 18 10 $true $TEXT 1 | Out-Null
+  Add-Text $s ("{0:N0}" -f $st.count) 764 $storeY 80 18 10 $true $MUTED 2 | Out-Null
+  Add-Box $s 604 ($storeY + 22) 240 8 $CARD2 $true | Out-Null
+  Add-Box $s 604 ($storeY + 22) $bw 8 $ACCENT $true | Out-Null
+  $storeY += 52
+}
 
-Add-Box $s 620 376 276 96 $CARD $true | Out-Null
-Add-Text $s "10,514" 636 388 240 30 20 $true $WHITE 1 | Out-Null
-Add-Text $s "products on offer right now" 636 420 240 18 10 $false $MUTED 1 | Out-Null
+Add-Text $s ("{0:N0}" -f $STATS.total) 604 356 200 34 22 $true $ACCENT 1 | Out-Null
+Add-Text $s "products in total" 604 392 200 18 10 $false $MUTED 1 | Out-Null
+Add-Text $s ("{0:N0} categories" -f $STATS.categories) 604 414 200 18 9 $false $MUTED 1 | Out-Null
 
 Add-Chrome $s 4 "What it is"
 
@@ -204,17 +210,35 @@ Add-Title $s "The same product, side by side" "THE ANSWER"
 
 Add-Shot $s (Join-Path $shots "compare.png") 64 150 560 "Compare stores" | Out-Null
 
-Add-Text $s "The cheapest price is green. Every other store shows exactly how much more it charges." 664 172 232 80 13 $false $TEXT 1 | Out-Null
+$ex = $STATS.examples[0]
+$cheapest = [double](($ex.prices | Measure-Object -Property price -Minimum).Minimum)
 
-Add-Box $s 664 270 232 64 $CARD $true | Out-Null
-Add-Text $s "PNS" 678 280 120 18 10 $true $TEXT 1 | Out-Null
-Add-Text $s "HK${HK}257.90" 678 300 120 20 12 $true $ACCENT 1 | Out-Null
+Add-Text $s "The cheapest price is green. Every other store shows exactly how much more it charges." 664 152 232 52 10 $false $MUTED 1 | Out-Null
 
-Add-Box $s 664 344 232 64 $CARD $true | Out-Null
-Add-Text $s "Wellcome" 678 354 120 18 10 $true $TEXT 1 | Out-Null
-Add-Text $s "+HK${HK}172.00" 678 374 120 20 12 $true $MUTED 1 | Out-Null
+Add-Box $s 664 214 78 78 $CARD $true | Out-Null
+if ($ex.image -and (Test-Path $ex.image)) {
+  $pic = $s.Shapes.AddPicture($ex.image, 0, -1, 670, 220, 66, 66)
+  $pic.Line.Visible = 0
+}
+Add-Text $s $ex.name 752 218 144 48 10 $true $TEXT 1 | Out-Null
+Add-Text $s $ex.size 752 266 144 16 8 $false $MUTED 1 | Out-Null
 
-Add-Text $s "One tap opens the product page on that store's website." 664 424 232 50 10 $false $MUTED 1 | Out-Null
+$rowY = 312
+foreach ($pr in $ex.prices) {
+  $price = [double]$pr.price
+  $isBest = [math]::Abs($price - $cheapest) -lt 0.001
+  $label = if ($pr.store -eq "pns") { "PNS" } elseif ($pr.store -eq "wellcome") { "Wellcome" } else { "Market Place" }
+  $priceText = "HK" + $HK + ("{0:N2}" -f $price)
+  Add-Text $s $label 664 $rowY 100 16 9 $true $TEXT 1 | Out-Null
+  Add-Text $s $priceText 764 $rowY 70 18 11 $true $(if ($isBest) { $ACCENT } else { $TEXT }) 1 | Out-Null
+  if (-not $isBest) {
+    $deltaText = "+HK" + $HK + ("{0:N2}" -f ($price - $cheapest))
+    Add-Text $s $deltaText 836 $rowY 60 16 8 $false $MUTED 2 | Out-Null
+  }
+  $rowY += 30
+}
+
+Add-Text $s "One tap opens the product page on that store's website." 664 414 232 40 9 $false $MUTED 1 | Out-Null
 Add-Chrome $s 6 "Compare"
 
 # ---------------------------------------------------------------- slide 7
@@ -223,13 +247,20 @@ Add-Title $s "Spot the real discounts" "SAVINGS"
 
 Add-Shot $s (Join-Path $shots "deals.png") 64 150 560 "Current price drops" | Out-Null
 
-Add-Text $s "Every offer keeps its original price, so a discount is a real discount - not just a sticker." 664 172 232 80 13 $false $TEXT 1 | Out-Null
+Add-Text $s "Every offer keeps its original price, so a discount is a real discount - not just a sticker." 664 152 232 52 10 $false $MUTED 1 | Out-Null
 
-Add-Text $s "10,514" 664 270 232 34 24 $true $ACCENT 1 | Out-Null
-Add-Text $s "products currently on offer" 664 304 232 20 10 $false $MUTED 1 | Out-Null
-Add-Text $s "89%" 664 344 232 34 24 $true $AMBER 1 | Out-Null
-Add-Text $s "biggest discount today" 664 378 232 20 10 $false $MUTED 1 | Out-Null
-Add-Text $s "Sorted by the biggest saving, so the best deals are at the top." 664 420 232 50 10 $false $MUTED 1 | Out-Null
+Add-Text $s "DISCOUNT DEPTH" 664 222 232 16 9 $true $ACCENT 1 | Out-Null
+$maxB = ($STATS.buckets | Measure-Object -Property count -Maximum).Maximum
+$bx = 672
+foreach ($b in $STATS.buckets) {
+  $bh = [math]::Round(($b.count / $maxB) * 110, 0)
+  $top = 372 - $bh
+  Add-Box $s $bx $top 38 $bh $ACCENT $false | Out-Null
+  Add-Text $s ("{0:N0}" -f $b.count) $bx ($top - 18) 38 16 8 $true $TEXT 2 | Out-Null
+  Add-Text $s $b.label $bx 378 38 16 8 $false $MUTED 2 | Out-Null
+  $bx += 52
+}
+Add-Text $s ("{0:N0} products on offer" -f $STATS.deals) 664 408 232 20 10 $false $MUTED 1 | Out-Null
 Add-Chrome $s 7 "Deals"
 
 # ---------------------------------------------------------------- slide 8
@@ -248,9 +279,21 @@ foreach ($st in $steps) {
   Add-Text $s $st.h $($st.x + 14) 202 162 26 15 $true $TEXT 1 | Out-Null
   Add-Text $s $st.b $($st.x + 14) 238 162 60 10 $false $MUTED 1 | Out-Null
 }
-Add-Box $s 64 340 832 96 $CARD2 $true | Out-Null
-Add-Text $s "48,062 products - 5,915 matched groups - 21,042 photos compared" 84 358 792 24 13 $true $TEXT 1 | Out-Null
-Add-Text $s "A full refresh takes about twenty minutes and runs on a normal laptop. No accounts, no tracking, no middleman." 84 388 792 34 11 $false $MUTED 1 | Out-Null
+Add-Box $s 64 336 832 116 $CARD2 $true | Out-Null
+Add-Text $s "COVERAGE" 84 348 200 16 9 $true $ACCENT 1 | Out-Null
+
+Add-Text $s "Products indexed" 84 368 220 16 9 $false $MUTED 1 | Out-Null
+Add-Text $s ("{0:N0}" -f $STATS.total) 700 364 180 20 12 $true $TEXT 1 | Out-Null
+Add-Box $s 84 388 600 10 $CARD $true | Out-Null
+Add-Box $s 84 388 600 10 $ACCENT $true | Out-Null
+
+$mw = [math]::Round(($STATS.matchedProducts / $STATS.total) * 600, 0)
+Add-Text $s "Listed by two or more stores" 84 408 260 16 9 $false $MUTED 1 | Out-Null
+Add-Text $s ("{0:N0}" -f $STATS.matchedProducts) 700 404 180 20 12 $true $AMBER 1 | Out-Null
+Add-Box $s 84 428 600 10 $CARD $true | Out-Null
+Add-Box $s 84 428 $mw 10 $AMBER $true | Out-Null
+
+Add-Text $s ("{0:N0} photos compared - a full refresh takes about twenty minutes." -f $STATS.photos) 84 458 832 16 9 $false $MUTED 1 | Out-Null
 Add-Chrome $s 8 "How"
 
 # ---------------------------------------------------------------- slide 9
