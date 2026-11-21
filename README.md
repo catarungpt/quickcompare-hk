@@ -45,7 +45,7 @@ product. The page only groups by that id, so the browser stays fast.
 ## Layout
 
 ```
-site/                 static site (no build step, no dependencies)
+docs/                 static site (no build step, no dependencies)
   index.html
   app.js
   styles.css
@@ -56,7 +56,7 @@ scripts/
   enrich.ps1          brand + pack size inference, match key
   make-hash-candidates.ps1
   match.ps1           cross-store matching -> matchGroup
-  build-index.ps1     merge stores -> site/data/index.json
+  build-index.ps1     merge stores -> docs/data/index.json
   serve-site.ps1      local static server with gzip
   ingest-server.ps1   browser crawlers post batches here
   refresh-wellcome.ps1

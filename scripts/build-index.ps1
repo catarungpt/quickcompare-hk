@@ -1,4 +1,4 @@
-# Merge every data/products/<store>.json into data/index.json and site/data/index.json.
+# Merge every data/products/<store>.json into data/index.json and docs/data/index.json.
 #
 # Usage:  powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-index.ps1
 
@@ -50,7 +50,7 @@ $json = $index | ConvertTo-Json -Depth 8 -Compress
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText((Join-Path $root "data\index.json"), $json, $utf8)
 
-$siteData = Join-Path $root "site\data"
+$siteData = Join-Path $root "docs\data"
 New-Item -ItemType Directory -Force -Path $siteData | Out-Null
 [System.IO.File]::WriteAllText((Join-Path $siteData "index.json"), $json, $utf8)
 

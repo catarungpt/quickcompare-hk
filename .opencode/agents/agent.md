@@ -136,10 +136,10 @@ When the user asks for a refresh, run the same steps immediately.
 
 ## Search page
 
-Publish a static site under `site/` that needs no build step and no server:
+Publish a static site under `docs/` that needs no build step and no server:
 
 ```text
-site/
+docs/
   index.html
   app.js
   styles.css
@@ -182,7 +182,7 @@ data/
   index.json
   products/<store>.json
   history/<store>/<YYYY-MM-DDTHH>.json
-site/
+docs/
   index.html
   app.js
   styles.css
@@ -197,7 +197,7 @@ reports/
 If `data/` does not exist, bootstrap it: create `stores.json` from the registry
 above, crawl every store, build `index.json`, generate the site, and write the
 first report. Then tell the user the product count per store, the refresh
-timestamp, and how to open `site/index.html`.
+timestamp, and how to open `docs/index.html`.
 
 ## Reporting to the user
 

@@ -1,5 +1,5 @@
 # Minimal static file server for the QuickCompare HK site.
-# No Node or Python needed. Serves ../site on http://localhost:5173/.
+# No Node or Python needed. Serves ../docs on http://localhost:5173/.
 #
 #   powershell -NoProfile -ExecutionPolicy Bypass -File scripts/serve.ps1
 #
@@ -9,7 +9,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$root = (Resolve-Path (Join-Path $PSScriptRoot "..\site")).Path
+$root = (Resolve-Path (Join-Path $PSScriptRoot "..\docs")).Path
 $rootPrefix = $root.TrimEnd([char[]]@('\', '/')) + [IO.Path]::DirectorySeparatorChar
 
 $mime = @{

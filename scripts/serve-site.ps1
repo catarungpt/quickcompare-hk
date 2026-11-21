@@ -4,7 +4,7 @@
 # Then open http://localhost:8765/
 
 $root = Split-Path -Parent $PSScriptRoot
-$site = Join-Path $root "site"
+$site = Join-Path $root "docs"
 $port = 8765
 
 Add-Type -AssemblyName System.IO.Compression | Out-Null
