@@ -23,7 +23,7 @@ $keep = @(
   "promotion", "image", "url", "linkType", "lastSeen", "lastChecked", "matchGroup"
 )
 
-Get-ChildItem $productsDir -Filter *.json | ForEach-Object {
+Get-ChildItem $productsDir -Filter *.json | Where-Object { $_.Name -notlike "*.prev.json" } | ForEach-Object {
   $doc = [System.IO.File]::ReadAllText($_.FullName, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
   $id = $doc.store
   $items = @($doc.products)

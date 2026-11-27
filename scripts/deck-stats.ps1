@@ -111,7 +111,7 @@ $stats = [ordered]@{
   )
   groups = $groups.Count
   matchedProducts = $matchedProducts.Count
-  comparisons = 8685
+  comparisons = 8350
   photos = $photos
   examples = $examples
 }

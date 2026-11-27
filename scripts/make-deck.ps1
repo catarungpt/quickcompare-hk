@@ -123,15 +123,15 @@ Add-Text $s "HK" 64 176 120 40 28 $true $ACCENT 1 | Out-Null
 Add-Text $s "One place to see what a product costs at Wellcome, PNS and Market Place - and which shop is cheapest today." 64 232 400 110 16 $false $MUTED 1 | Out-Null
 Add-Accent $s 64 352 86
 
-Add-Text $s "48,062" 64 386 140 34 24 $true $ACCENT 1 | Out-Null
+Add-Text $s ("{0:N0}" -f $STATS.total) 64 386 140 34 24 $true $ACCENT 1 | Out-Null
 Add-Text $s "products" 64 418 140 18 10 $false $MUTED 1 | Out-Null
 Add-Text $s "3" 216 386 100 34 24 $true $WHITE 1 | Out-Null
 Add-Text $s "stores" 216 418 100 18 10 $false $MUTED 1 | Out-Null
-Add-Text $s "8,685" 300 386 140 34 24 $true $AMBER 1 | Out-Null
+Add-Text $s ("{0:N0}" -f $STATS.comparisons) 300 386 140 34 24 $true $AMBER 1 | Out-Null
 Add-Text $s "comparisons" 300 418 140 18 10 $false $MUTED 1 | Out-Null
 
 Add-Text $s "Live at catarungpt.github.io/quickcompare-hk" 64 462 500 20 10 $false $MUTED 1 | Out-Null
-Add-Shot $s (Join-Path $shots "home.png") 500 110 400 "The live site, 21 November 2026" | Out-Null
+Add-Shot $s (Join-Path $shots "home.png") 500 110 400 "The live site, 27 November 2026" | Out-Null
 
 # ---------------------------------------------------------------- slide 2
 $s = New-Slide

@@ -81,17 +81,29 @@ Get-ChildItem $rawDir -Filter "chunk-wellcome2-*.json" | ForEach-Object {
 }
 
 # ---------- Market Place ----------
+# The storefront now returns Chinese product names. Reuse the English names we
+# already captured for the same SKU on the previous crawl.
+$prevMp = @{}
+$prevPath = Join-Path $root "data\backups\marketplace-nov21.json"
+if (Test-Path $prevPath) {
+  $prevDoc = [System.IO.File]::ReadAllText($prevPath, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
+  foreach ($p in $prevDoc.products) {
+    if ($p.sku -and $p.name) { $prevMp["$($p.sku)"] = "$($p.name)" }
+  }
+}
+
 $mp = [ordered]@{}
 Get-ChildItem $rawDir -Filter "chunk-marketplace2-*.json" | ForEach-Object {
   foreach ($p in (Read-Chunk $_.FullName)) {
     if (-not $p.sku) { continue }
     if ($mp.Contains($p.sku)) { continue }
-    $slug = [uri]::EscapeDataString("$($p.name)")
+    $name = if ($prevMp.ContainsKey("$($p.sku)")) { $prevMp["$($p.sku)"] } else { "$($p.name)" }
+    $slug = [uri]::EscapeDataString($name)
     $mp[$p.sku] = [ordered]@{
       store         = "marketplace"
       storeName     = "Market Place"
       sku           = "$($p.sku)"
-      name          = "$($p.name)"
+      name          = $name
       brand         = $null
       barcode       = $null
       category      = @($p.cat)

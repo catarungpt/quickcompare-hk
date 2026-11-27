@@ -1,44 +1,48 @@
-# Price refresh — 2026-11-21 15:35 (HKT)
+# Price refresh — 2026-11-27 22:42 (HKT)
 
 ## Summary
 
-| Store | Products | Change vs 07 Nov |
+| Store | Products | vs 21 Nov |
 | --- | ---: | --- |
-| PNS | 25,976 | ~same |
-| Wellcome | 11,682 | -223 |
-| Market Place | 10,404 | -223 |
-| **Total** | **48,062** | -447 |
+| PNS | 26,000 | +24 |
+| Wellcome | 11,538 | -144 |
+| Market Place | 10,163 | -241 |
+| **Total** | **47,701** | -361 |
 
-Every price, stock flag and promotion is from today's crawl. The previous index
-was 14 days old.
+- Cross-store match groups: **5,472**
+- Products listed by 2+ stores: **13,618**
+- Price comparisons shown: **8,350**
+- Image hashes: **21,317** (275 new this run)
+- Products on offer: **11,128**
 
 ## Pipeline
 
-1. Crawled PNS (260 pages), Wellcome (21 categories) and Market Place (21
-   categories) through the browser, posting each batch to the local ingest
-   endpoint.
-2. Merged raw chunks into `data/products/<store>.json`.
-3. Re-inferred brand and pack size; 3,734 match keys span two or more stores.
-4. Image hashes: 21,042 (only 2,190 new images needed hashing; the rest were
-   reused from the previous run).
-5. Combined matching: 64,630 candidate pairs, 11,336 accepted, **5,915
-   cross-store groups**.
-6. Rebuilt `data/index.json` and `site/data/index.json` (28 MB, 3.5 MB gzipped).
+1. Crawled PNS (260 pages), Wellcome (21 categories) and Market Place
+   (21 categories) through the browser.
+2. Merged, enriched brand and pack size, hashed only the new images, matched,
+   rebuilt the index.
+3. Rebuilt the deck and its screenshots from the new index.
 
-## Spot check
+## Issue found: the DFI API dropped English names
 
-*Kowloon Dairy Fresh Milk 946ML* still compares correctly:
+Both Wellcome (`/api/item/wareSearch`) and Market Place now return Chinese
+product names even with `superweb-locale: en_US`. On 21 Nov the same requests
+returned English.
 
-| Store | Price | Difference |
-| --- | ---: | ---: |
-| PNS | HK$28.00 | best price |
-| Market Place | HK$32.00 | +HK$4.00 |
-| Wellcome | HK$32.00 | +HK$4.00 |
+Fix: `scripts/restore-names.ps1` reuses the English names captured on the
+previous crawl for the same SKU and rebuilds the product URLs.
 
-## Notes
+- Wellcome: 10,825 names restored, 519 still Chinese (mostly new SKUs)
+- Market Place: 9,613 were already English, 550 remain Chinese
 
-- `scripts/make-hash-candidates.ps1` now reuses existing image hashes and only
-  sends new products to the browser hasher.
-- Hash chunks written by a re-run must use unique tags, otherwise identical
-  range names overwrite earlier chunks. Fixed by tagging batches (`r2a`, `w1`,
-  `m1`, …).
+## Known limitation
+
+The ~1,000 products that remain Chinese cannot match English-named products by
+name. They still match by brand and pack size where the brand is present in the
+name (many DFI names start with an English brand).
+
+## Next steps
+
+- Ask DFI whether the English catalogue is still available under another locale.
+- Extend `restore-names.ps1` to translate new Chinese names, not just reuse old
+  ones.
